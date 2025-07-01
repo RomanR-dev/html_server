@@ -1,11 +1,12 @@
 ### HTML Report Server - PyCharm HTTP Client Tests
-### Base URL: http://localhost:3000
 
-### 1. Health Check
+
+### 1. Health
 GET http://localhost:3000/health
-Accept: application/json
+Content-Type: application/json
 
 ###
+
 
 ### 2. Upload Sample Performance Report
 POST http://localhost:3000/upload
