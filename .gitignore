@@ -30,3 +30,5 @@ coverage
 *.tsbuildinfo
 .vscode
 server_html.iml
+
+reports/*

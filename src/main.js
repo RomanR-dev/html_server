@@ -273,7 +273,7 @@ app.delete('/report/:key', async (req, res) => {
 
 // Root endpoint with documentation
 app.get('/', (req, res) => {
-    res.send(fs.readFile(path.join(__dirname, 'index.html'), 'utf8'));
+    res.send(fs.readFile(path.join(__dirname, '..', 'README.md'), 'utf8'));
 });
 
 // Health check
