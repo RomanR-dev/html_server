@@ -99,39 +99,6 @@ function createCleanupRoutes(reportMap, reportsDir) {
             }
         });
     });
-
-
-    // GET /exists/:key - Check if report exists
-    router.get('/exists/:key', (req, res) => {
-        const { key } = req.params;
-
-        if (!key) {
-            return res.status(400).json({
-                error: 'Key parameter is required'
-            });
-        }
-
-        const exists = reportMap.has(key);
-
-        if (exists) {
-            const reportInfo = reportMap.get(key);
-            res.json({
-                exists: true,
-                key,
-                url: `/report/${key}`,
-                serve_url: `http://localhost:${PORT}/report/${key}`,
-                created: reportInfo.created,
-                updated: reportInfo.updated,
-                lastAccessed: reportInfo.lastAccessed
-            });
-        } else {
-            res.json({
-                exists: false,
-                key
-            });
-        }
-    });
-
     return router;
 }
 

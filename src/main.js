@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
+const marked = require('marked');
 
 // cleanup
 // Import cleanup utilities
@@ -272,8 +273,30 @@ app.delete('/report/:key', async (req, res) => {
 });
 
 // Root endpoint with documentation
-app.get('/', (req, res) => {
-    res.send(fs.readFile(path.join(__dirname, '..', 'README.md'), 'utf8'));
+app.get('/', async (req, res) => {
+    const markdownContent = await fs.readFile(path.join(__dirname, '..', 'README.md'), 'utf8');
+    const htmlContent = marked.parse(markdownContent);
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`
+            <!DOCTYPE html>
+            <html lang="en-US">
+            <head>
+                <title>HTML Report Server - Documentation</title>
+                <style>
+                    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+                    code { background: #f4f4f4; padding: 2px 4px; border-radius: 3px; }
+                    pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+                    table { border-collapse: collapse; width: 100%; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                </style>
+            </head>
+            <body>
+                ${htmlContent}
+            </body>
+            </html>
+        `);
 });
 
 // Health check
@@ -284,6 +307,37 @@ app.get('/health', (req, res) => {
         reports: reportMap.size,
         uptime: process.uptime()
     });
+});
+
+// GET /exists/:key - Check if report exists
+app.get('/exists/:key', (req, res) => {
+    const { key } = req.params;
+
+    if (!key) {
+        return res.status(400).json({
+            error: 'Key parameter is required'
+        });
+    }
+
+    const exists = reportMap.has(key);
+
+    if (exists) {
+        const reportInfo = reportMap.get(key);
+        res.json({
+            exists: true,
+            key,
+            url: `/report/${key}`,
+            serve_url: `http://localhost:${PORT}/report/${key}`,
+            created: reportInfo.created,
+            updated: reportInfo.updated,
+            lastAccessed: reportInfo.lastAccessed
+        });
+    } else {
+        res.json({
+            exists: false,
+            key
+        });
+    }
 });
 
 // Start server

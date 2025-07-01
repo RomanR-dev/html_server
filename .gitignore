@@ -31,4 +31,5 @@ coverage
 .vscode
 server_html.iml
 
-reports/*
+reports
+test-results
