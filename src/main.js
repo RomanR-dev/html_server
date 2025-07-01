@@ -273,67 +273,7 @@ app.delete('/report/:key', async (req, res) => {
 
 // Root endpoint with documentation
 app.get('/', (req, res) => {
-    res.send(`
-        <html>
-        <head>
-            <title>HTML Report Server</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-                .endpoint { background: #f4f4f4; padding: 15px; margin: 10px 0; border-radius: 5px; }
-                .method { color: white; padding: 4px 8px; border-radius: 3px; font-weight: bold; }
-                .post { background: #28a745; }
-                .get { background: #007bff; }
-                .delete { background: #dc3545; }
-                code { background: #f8f9fa; padding: 2px 4px; border-radius: 3px; }
-            </style>
-        </head>
-        <body>
-            <h1>🚀 HTML Report Server</h1>
-            <p>Server for uploading, updating, and serving HTML reports with CSS styling.</p>
-            
-            <h2>📡 API Endpoints</h2>
-            
-            <div class="endpoint">
-                <span class="method post">POST</span> <strong>/upload</strong>
-                <p>Upload new HTML report</p>
-                <code>{ "html": "&lt;html&gt;...&lt;/html&gt;", "key": "unique-key" }</code>
-            </div>
-            
-            <div class="endpoint">
-                <span class="method post">POST</span> <strong>/update</strong>
-                <p>Update existing HTML report</p>
-                <code>{ "html": "&lt;html&gt;...&lt;/html&gt;", "key": "existing-key" }</code>
-            </div>
-            
-            <div class="endpoint">
-                <span class="method get">GET</span> <strong>/serve?key=report-key</strong>
-                <p>Get URL info for a report</p>
-            </div>
-            
-            <div class="endpoint">
-                <span class="method get">GET</span> <strong>/report/:key</strong>
-                <p>View the actual HTML report</p>
-            </div>
-            
-            <div class="endpoint">
-                <span class="method get">GET</span> <strong>/reports</strong>
-                <p>List all available reports</p>
-            </div>
-            
-            <div class="endpoint">
-                <span class="method delete">DELETE</span> <strong>/report/:key</strong>
-                <p>Delete a report</p>
-            </div>
-            
-            <h2>📊 Current Reports</h2>
-            <p><a href="/reports">View all reports (${reportMap.size} available)</a></p>
-            
-            <h2>🎨 CSS</h2>
-            <p>CSS is automatically injected into all HTML reports.</p>
-            <p><a href="/public/report.css">View CSS file</a></p>
-        </body>
-        </html>
-    `);
+    res.send(fs.readFile(path.join(__dirname, 'index.html'), 'utf8'));
 });
 
 // Health check
