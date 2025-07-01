@@ -1,0 +1,193 @@
+### HTML Report Server - PyCharm HTTP Client Tests
+### Base URL: http://localhost:3000
+
+### 1. Health Check
+GET http://localhost:3000/health
+Accept: application/json
+
+###
+
+### 2. Upload Sample Performance Report
+POST http://localhost:3000/upload
+Content-Type: application/json
+
+{
+  "key": "performance-report-001",
+  "html": "<html><head><meta charset=\"UTF-8\"><title>Performance Test Report</title></head><body><div class=\"report-container\"><h1>Performance Test Report</h1><div style=\"display: flex; gap: 20px; margin: 20px 0;\"><div class=\"metric\"><div class=\"metric-value\">98%</div><div class=\"metric-label\">Success Rate</div></div><div class=\"metric\"><div class=\"metric-value\">1.2s</div><div class=\"metric-label\">Avg Response</div></div><div class=\"metric\"><div class=\"metric-value\">1,543</div><div class=\"metric-label\">Total Requests</div></div></div><h2>Test Results</h2><table><thead><tr><th>Test Case</th><th>Status</th><th>Duration</th><th>Details</th></tr></thead><tbody><tr><td>Login Flow</td><td><span class=\"success\">PASSED</span></td><td>850ms</td><td>All authentication steps successful</td></tr><tr><td>API Endpoint Tests</td><td><span class=\"success\">PASSED</span></td><td>1.2s</td><td>All endpoints responding correctly</td></tr><tr><td>Database Connection</td><td><span class=\"warning\">WARNING</span></td><td>2.1s</td><td>Slower than expected response time</td></tr><tr><td>File Upload</td><td><span class=\"error\">FAILED</span></td><td>timeout</td><td>Connection timeout after 30s</td></tr></tbody></table><h2>Error Details</h2><div class=\"error\"><h3>File Upload Test Failure</h3><pre><code>Error: Connection timeout\n  at FileUploadTest.run (/tests/upload.js:45)\n  at TestRunner.execute (/lib/runner.js:123)\n  \nStack trace:\n  - Attempted to upload 5MB test file\n  - Connection established successfully\n  - Upload started but stalled at 60%\n  - Timeout reached after 30 seconds</code></pre></div><h2>Recommendations</h2><ul><li class=\"success\">✅ Login and API tests are stable</li><li class=\"warning\">⚠️ Investigate database performance issues</li><li class=\"error\">❌ Fix file upload timeout - consider chunked uploads</li><li class=\"info\">ℹ️ Add retry logic for failed uploads</li></ul></div></body></html>"
+}
+
+###
+
+### 3. Upload Security Scan Report
+POST http://localhost:3000/upload
+Content-Type: application/json
+
+{
+  "key": "security-scan-001",
+  "html": "<html><head><meta charset=\"UTF-8\"><title>Security Vulnerability Scan</title></head><body><div class=\"report-container\"><h1>Security Vulnerability Scan</h1><p>Scan completed on <strong>2025-01-07 14:30:00</strong></p><div style=\"display: flex; gap: 20px; margin: 20px 0;\"><div class=\"metric\"><div class=\"metric-value\">7</div><div class=\"metric-label\">Critical Issues</div></div><div class=\"metric\"><div class=\"metric-value\">23</div><div class=\"metric-label\">Medium Issues</div></div><div class=\"metric\"><div class=\"metric-value\">45</div><div class=\"metric-label\">Low Issues</div></div><div class=\"metric\"><div class=\"metric-value\">89%</div><div class=\"metric-label\">Score</div></div></div><h2>Critical Vulnerabilities</h2><table><thead><tr><th>Severity</th><th>Vulnerability</th><th>Component</th><th>Status</th><th>CVSS</th></tr></thead><tbody><tr><td><span class=\"error\">CRITICAL</span></td><td>SQL Injection</td><td>User Login</td><td><span class=\"success\">FIXED</span></td><td>9.8</td></tr><tr><td><span class=\"error\">CRITICAL</span></td><td>Remote Code Execution</td><td>File Upload</td><td><span class=\"error\">OPEN</span></td><td>9.3</td></tr><tr><td><span class=\"warning\">HIGH</span></td><td>XSS Vulnerability</td><td>Comment System</td><td><span class=\"warning\">IN PROGRESS</span></td><td>7.5</td></tr><tr><td><span class=\"warning\">HIGH</span></td><td>Path Traversal</td><td>Download API</td><td><span class=\"error\">OPEN</span></td><td>7.2</td></tr><tr><td><span class=\"info\">MEDIUM</span></td><td>Information Disclosure</td><td>Error Pages</td><td><span class=\"success\">FIXED</span></td><td>5.3</td></tr></tbody></table><h2>Remediation Actions</h2><ul><li class=\"error\">🚨 <strong>URGENT:</strong> Patch Remote Code Execution vulnerability immediately</li><li class=\"warning\">⚠️ Complete XSS fix within 48 hours</li><li class=\"warning\">⚠️ Implement path traversal protection</li><li class=\"success\">✅ SQL injection vulnerability successfully patched</li><li class=\"info\">ℹ️ Review error handling to prevent information leakage</li></ul></div></body></html>"
+}
+
+###
+
+
+### 4. Upload Simple Dashboard Report
+POST http://localhost:3000/upload
+Content-Type: application/json
+
+{
+  "key": "dashboard-001",
+  "html": "<html><head><title>System Dashboard</title></head><body><div class=\"report-container\"><h1>System Monitoring Dashboard</h1><h2>Server Metrics</h2><table><tr><th>Metric</th><th>Current</th><th>Threshold</th><th>Status</th></tr><tr><td>CPU Usage</td><td>45%</td><td>80%</td><td><span class=\"success\">NORMAL</span></td></tr><tr><td>Memory Usage</td><td>78%</td><td>85%</td><td><span class=\"warning\">WARNING</span></td></tr><tr><td>Disk Usage</td><td>92%</td><td>90%</td><td><span class=\"error\">CRITICAL</span></td></tr><tr><td>Network I/O</td><td>156 Mbps</td><td>1 Gbps</td><td><span class=\"success\">NORMAL</span></td></tr></table><h2>Application Status</h2><ul><li class=\"success\">Web Server: Running (uptime: 15 days)</li><li class=\"success\">Database: Connected (response: 23ms)</li><li class=\"error\">Cache Server: Disconnected</li><li class=\"warning\">Load Balancer: High traffic detected</li></ul></div></body></html>"
+}
+
+###
+
+### 5. Get Serve Info for Performance Report
+GET http://localhost:3000/serve?key=performance-report-001
+Accept: application/json
+
+###
+
+### 6. Get Serve Info for Security Report
+GET http://localhost:3000/serve?key=security-scan-001
+Accept: application/json
+
+###
+
+### 7. List All Reports
+GET http://localhost:3000/reports
+Accept: application/json
+
+###
+
+### 8. Update Performance Report with New Data
+POST http://localhost:3000/update
+Content-Type: application/json
+
+{
+  "key": "performance-report-001",
+  "html": "<html><head><meta charset=\"UTF-8\"><title>Updated Performance Test Report</title></head><body><div class=\"report-container\"><h1>🔄 Updated Performance Test Report</h1><p><strong>Last Updated:</strong> January 7, 2025 - 15:45:00</p><div style=\"display: flex; gap: 20px; margin: 20px 0;\"><div class=\"metric\"><div class=\"metric-value\">99.2%</div><div class=\"metric-label\">Success Rate</div></div><div class=\"metric\"><div class=\"metric-value\">0.8s</div><div class=\"metric-label\">Avg Response</div></div><div class=\"metric\"><div class=\"metric-value\">2,847</div><div class=\"metric-label\">Total Requests</div></div><div class=\"metric\"><div class=\"metric-value\">3</div><div class=\"metric-label\">Errors</div></div></div><h2>✅ Improvements Made</h2><ul><li class=\"success\">Fixed file upload timeout issue</li><li class=\"success\">Optimized database queries</li><li class=\"success\">Improved response times by 33%</li><li class=\"info\">Added retry logic for failed requests</li></ul><h2>Updated Test Results</h2><table><thead><tr><th>Test Case</th><th>Status</th><th>Duration</th><th>Improvement</th></tr></thead><tbody><tr><td>Login Flow</td><td><span class=\"success\">PASSED</span></td><td>650ms</td><td>↗️ 200ms faster</td></tr><tr><td>API Endpoint Tests</td><td><span class=\"success\">PASSED</span></td><td>0.9s</td><td>↗️ 300ms faster</td></tr><tr><td>Database Connection</td><td><span class=\"success\">PASSED</span></td><td>1.1s</td><td>↗️ 1s faster</td></tr><tr><td>File Upload</td><td><span class=\"success\">PASSED</span></td><td>4.2s</td><td>✅ Now working!</td></tr></tbody></table></div></body></html>"
+}
+
+###
+
+### 9. Try to Upload Duplicate Key (Should Fail)
+POST http://localhost:3000/upload
+Content-Type: application/json
+
+{
+  "key": "performance-report-001",
+  "html": "<html><head><title>This should fail</title></head><body><h1>Duplicate Key Test</h1></body></html>"
+}
+
+###
+
+### 10. Try to Update Non-Existent Report (Should Fail)
+POST http://localhost:3000/update
+Content-Type: application/json
+
+{
+  "key": "non-existent-report",
+  "html": "<html><head><title>This should fail</title></head><body><h1>Non-existent Key Test</h1></body></html>"
+}
+
+###
+
+### 11. Get Non-Existent Serve Info (Should Fail)
+GET http://localhost:3000/serve?key=non-existent-report
+Accept: application/json
+
+###
+
+### 12. Upload Complex Analytics Report
+POST http://localhost:3000/upload
+Content-Type: application/json
+
+{
+  "key": "analytics-report-q4",
+  "html": "<html><head><title>Q4 Analytics Report</title></head><body><div class=\"report-container\"><h1>📊 Q4 2024 Analytics Report</h1><div style=\"display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap;\"><div class=\"metric\"><div class=\"metric-value\">$2.4M</div><div class=\"metric-label\">Revenue</div></div><div class=\"metric\"><div class=\"metric-value\">156K</div><div class=\"metric-label\">Active Users</div></div><div class=\"metric\"><div class=\"metric-value\">23%</div><div class=\"metric-label\">Growth</div></div><div class=\"metric\"><div class=\"metric-value\">4.7</div><div class=\"metric-label\">Avg Rating</div></div><div class=\"metric\"><div class=\"metric-value\">89%</div><div class=\"metric-label\">Retention</div></div><div class=\"metric\"><div class=\"metric-value\">2.3M</div><div class=\"metric-label\">Page Views</div></div></div><h2>Monthly Breakdown</h2><table><thead><tr><th>Month</th><th>Revenue</th><th>Users</th><th>Conversion</th><th>Trend</th></tr></thead><tbody><tr><td>October</td><td>$750K</td><td>48K</td><td>3.2%</td><td><span class=\"success\">↗️ +12%</span></td></tr><tr><td>November</td><td>$820K</td><td>52K</td><td>3.8%</td><td><span class=\"success\">↗️ +9%</span></td></tr><tr><td>December</td><td>$830K</td><td>56K</td><td>4.1%</td><td><span class=\"success\">↗️ +1%</span></td></tr></tbody></table><h2>Top Performing Features</h2><ul><li class=\"success\">🏆 Mobile App: 67% user engagement</li><li class=\"success\">📱 Push Notifications: 45% open rate</li><li class=\"warning\">💳 Payment Flow: 12% abandonment (needs improvement)</li><li class=\"info\">🔍 Search Function: 78% satisfaction score</li></ul><h2>Key Insights</h2><div class=\"info\"><h3>📈 Growth Opportunities</h3><ul><li>Mobile engagement is 40% higher than web</li><li>Users from organic search have 25% better retention</li><li>Premium features show 89% user satisfaction</li></ul></div></div></body></html>"
+}
+
+###
+
+### 13. Delete a Report
+DELETE http://localhost:3000/report/dashboard-001
+Accept: application/json
+
+###
+
+### 14. Verify Report is Deleted
+GET http://localhost:3000/serve?key=dashboard-001
+Accept: application/json
+
+###
+
+### 15. View Server Root (Documentation)
+GET http://localhost:3000/
+Accept: text/html
+
+###
+
+### 16. Get Cleanup Configuration
+GET http://localhost:3000/cleanup/config
+Accept: application/json
+
+###
+
+### 17. Trigger Manual Cleanup
+POST http://localhost:3000/cleanup
+Content-Type: application/json
+
+###
+
+### 18. Update Cleanup Configuration (Example: 2 hours idle, 2 days max age)
+PUT http://localhost:3000/cleanup/config
+Content-Type: application/json
+
+{
+  "enabled": true,
+  "maxIdleTimeHours": 2,
+  "maxAgeDays": 1,
+  "cleanupIntervalMinutes": 10
+}
+
+###
+
+### 19. Disable Cleanup
+PUT http://localhost:3000/cleanup/config
+Content-Type: application/json
+
+{
+  "enabled": false
+}
+
+###
+
+### 20. Re-enable Cleanup with Default Settings
+PUT http://localhost:3000/cleanup/config
+Content-Type: application/json
+
+{
+  "enabled": true,
+  "maxIdleTimeHours": 24,
+  "maxAgeDays": 7,
+  "cleanupIntervalMinutes": 30
+}
+
+###
+
+### 21. Check if Report Exists (Should exist)
+GET http://localhost:3000/exists/performance-report-001
+Accept: application/json
+
+###
+
+### 22. Check if Report Exists (Should NOT exist)
+GET http://localhost:3000/exists/non-existent-report
+Accept: application/json
+
+###
+
+### Direct Report URLs (Open these in browser):
+### http://localhost:3000/report/performance-report-001
+### http://localhost:3000/report/security-scan-001
+### http://localhost:3000/report/analytics-report-q4

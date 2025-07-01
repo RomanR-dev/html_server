@@ -1,0 +1,25 @@
+{
+  "name": "html-report-server",
+  "version": "1.0.0",
+  "description": "Server for uploading, updating, and serving HTML reports with CSS styling",
+  "main": "server.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "nodemon main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "html",
+    "reports",
+    "express",
+    "nodejs"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
