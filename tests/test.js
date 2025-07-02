@@ -114,16 +114,27 @@ describe('System Health', () => {
 // Report Upload Tests
 describe('Report Upload', () => {
     test('Upload New Report', async () => {
-        const response = await makeRequest('POST', '/upload', {
-            key: 'test-report-001',
-            html: sampleHTML
-        });
-
-        expect(response.status).toBe(200);
-        expect(response.data.success).toBe(true);
-        expect(response.data.key).toBe('test-report-001');
-        expect(response.data.serve_url).toContain('/report/test-report-001');
-        expect(response.data.url).toBe('/report/test-report-001');
+        // Generate a randomized list of 100 unique HTML file names
+        // Generate a randomized list of 100 unique random string HTML file names
+        function randomString(length = 8) {
+            return Math.random().toString(36).substring(2, 2 + length);
+        }
+        const htmlNamesSet = new Set();
+        while (htmlNamesSet.size < 100) {
+            htmlNamesSet.add(`${randomString(10)}.html`);
+        }
+        const htmlNamesList = Array.from(htmlNamesSet);
+        for (const htmlName of htmlNamesList) {
+            const response = await makeRequest('POST', '/upload', {
+                key: htmlName,
+                html: sampleHTML
+            });
+            expect(response.status).toBe(200);
+            expect(response.data.success).toBe(true);
+            expect(response.data.key).toBe(htmlName);
+            expect(response.data.serve_url).toContain(`/report/${htmlName}`);
+            expect(response.data.url).toBe(`/report/${htmlName}`);
+        }
     });
 
     test('Upload Another Report', async () => {

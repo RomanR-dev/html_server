@@ -583,6 +583,50 @@ function setupApiRoutes(app, reportMap, REPORTS_DIR, PUBLIC_DIR, PORT) {
         res.send(html);
     });
 
+    // Batch update reports endpoint
+    app.post('/update-reports', async (req, res) => {
+        try {
+            const { reports } = req.body;
+            if (!Array.isArray(reports) || reports.length === 0) {
+                return res.status(400).json({ error: 'reports[] is required' });
+            }
+            // Check all keys exist first
+            const missingKeys = reports.filter(r => !r.key || !reportMap.has(r.key)).map(r => r.key);
+            if (missingKeys.length > 0) {
+                return res.status(404).json({
+                    error: 'One or more keys not found. All keys must exist to update.',
+                    missingKeys
+                });
+            }
+            const results = [];
+            for (const { key, html } of reports) {
+                if (!key || !html) {
+                    results.push({ key, success: false, error: 'Missing key or html' });
+                    continue;
+                }
+                const htmlWithCSS = injectCSS(html);
+                const filename = `${key}.html`;
+                const filepath = path.join(REPORTS_DIR, filename);
+                try {
+                    await fs.writeFile(filepath, htmlWithCSS, 'utf8');
+                    const reportInfo = reportMap.get(key);
+                    reportInfo.updated = new Date();
+                    results.push({ key, success: true, url: `/report/${key}` });
+                } catch (error) {
+                    results.push({ key, success: false, error: error.message });
+                }
+            }
+            res.json({
+                success: true,
+                updated: results.filter(r => r.success).map(r => r.key),
+                results
+            });
+        } catch (error) {
+            console.error('Update-reports error:', error);
+            res.status(500).json({ error: 'Failed to update reports' });
+        }
+    });
+
     // Error and not found pages (example usage)
     app.use(async (req, res, next) => {
         const html = await renderTemplate('error.html', { TITLE: '404 Not Found', MESSAGE: 'The page you are looking for does not exist.' });

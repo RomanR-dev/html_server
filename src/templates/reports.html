@@ -5,18 +5,6 @@
     <title>All Reports</title>
     <link rel="stylesheet" href="/public/report.css">
     <style>
-        .toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-            gap: 12px;
-        }
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
         .btn {
             background: linear-gradient(90deg,#667eea 0%,#764ba2 100%);
             color: #fff;
@@ -32,20 +20,6 @@
         .btn:hover {
             background: linear-gradient(90deg,#4f8cff 0%,#764ba2 100%);
             box-shadow: 0 4px 16px #667eea33;
-        }
-        .search-box-wrap {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .search-box {
-            padding-left: 38px;
-        }
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            color: #bbb;
-            font-size: 1.2em;
         }
         .sticky-header th {
             position: sticky;
@@ -80,12 +54,6 @@
             margin-bottom: 18px;
             color: #e0e7ff;
         }
-        @media (max-width: 700px) {
-            .toolbar { flex-direction: column; align-items: stretch; gap: 18px; }
-            .toolbar-left { flex-direction: column; align-items: stretch; gap: 10px; }
-            .container { padding: 10px 2vw; }
-            table { font-size: 0.98em; }
-        }
         .expand-btn { cursor: pointer; color: #2563eb; font-size: 1.1em; }
         .expand-btn:hover { color: #764ba2; }
         .back-btn {
@@ -106,12 +74,145 @@
             color: #fff;
             border-color: #1746a0;
         }
-        .filters-bar {
-            background: #f7f9fb;
-            border-radius: 14px;
-            box-shadow: 0 2px 8px #0001;
+        .filters-bar-hd {
+            background: linear-gradient(120deg, #4f8cffcc 0%, #667eeacc 100%);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px #4f8cff22;
             padding: 18px 24px 10px 24px;
-            margin-bottom: 24px;
+            margin-bottom: 32px;
+            backdrop-filter: blur(8px);
+            border: 1.5px solid #e0e7ff;
+        }
+        .filters-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .search-wrap {
+            position: relative;
+            flex: 1 1 220px;
+            max-width: 260px;
+        }
+        .search-box-hd {
+            width: 100%;
+            padding: 10px 12px 10px 38px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1em;
+            background: #fff;
+            color: #222;
+            box-shadow: 0 2px 8px #0001;
+            outline: none;
+            transition: box-shadow 0.15s;
+        }
+        .search-box-hd:focus {
+            box-shadow: 0 4px 16px #4f8cff33;
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4f8cff;
+            font-size: 1.1em;
+        }
+        .filter-select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1em;
+            background: #e0e7ff;
+            color: #2563eb;
+            font-weight: 500;
+            box-shadow: 0 1px 4px #0001;
+            outline: none;
+            transition: box-shadow 0.15s;
+        }
+        .filter-select:focus {
+            box-shadow: 0 2px 8px #4f8cff33;
+        }
+        .export-btn {
+            margin-left: auto;
+            font-size: 1em;
+            padding: 10px 22px;
+            border-radius: 8px;
+            background: linear-gradient(90deg,#2563eb 0%,#4f8cff 100%);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #2563eb22;
+        }
+        .export-btn:hover {
+            background: linear-gradient(90deg,#1746a0 0%,#4f8cff 100%);
+        }
+        @media (max-width: 900px) {
+            .filters-bar-hd { padding: 12px 2vw 8px 2vw; }
+            .filters-row { flex-direction: column; align-items: stretch; gap: 10px; }
+            .export-btn { margin-left: 0; }
+        }
+        .search-row { display: none; }
+        .search-wrap-table {
+            position: relative;
+            width: 260px;
+            margin: 0 auto 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .hd-table {
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px #4f8cff22;
+            background: rgba(255,255,255,0.95);
+        }
+        .table-caption {
+            caption-side: top;
+            background: none;
+            padding: 0 0 8px 0;
+        }
+        .hd-header th {
+            background: linear-gradient(90deg, #4f8cff 0%, #667eea 100%);
+            color: #fff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 1.13em;
+            letter-spacing: 0.7px;
+            border-bottom: 2.5px solid #e0e7ff;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            box-shadow: 0 2px 12px #4f8cff22;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            user-select: none;
+            padding-top: 18px;
+            padding-bottom: 18px;
+        }
+        .hd-header th:first-child { border-top-left-radius: 18px; }
+        .hd-header th:last-child { border-top-right-radius: 18px; }
+        .hd-header th.sortable:hover, .hd-header th.sortable:focus {
+            background: linear-gradient(90deg, #2563eb 0%, #4f8cff 100%);
+            color: #fff;
+        }
+        .sort-arrow {
+            margin-left: 8px;
+            font-size: 1.18em;
+            color: #e0e7ff;
+            transition: color 0.2s, text-shadow 0.2s, transform 0.2s;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        .hd-header th.sortable:hover .sort-arrow, .hd-header th.sortable:focus .sort-arrow {
+            color: #fff;
+            text-shadow: 0 2px 8px #2563eb88;
+            transform: scale(1.25) rotate(-10deg);
+        }
+        @media (max-width: 900px) {
+            .search-wrap-table { width: 100%; max-width: 100%; }
+            .hd-table { border-radius: 10px; }
+            .hd-header th { border-radius: 0; font-size: 1em; padding-top: 12px; padding-bottom: 12px; }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -120,31 +221,20 @@
     <div class="container">
         <a href="/" class="back-btn"><i class="fa fa-arrow-left"></i> Back to Home</a>
         <h1 style="margin-bottom:18px;">Live Report HTML viewer</h1>
-        <div class="filters-bar">
-            <div class="toolbar">
-                <div class="toolbar-left">
-                    <button class="btn" onclick="exportCSV()">
-                        <i class="fa fa-file-csv"></i> Export CSV
-                    </button>
-                </div>
-                <div class="search-box-wrap">
-                    <i class="fa fa-search search-icon"></i>
-                    <input class="search-box" id="search" placeholder="Search by name..." oninput="filterTable()" />
-                </div>
-            </div>
-        </div>
-        <div id="emptyState" class="empty-state" style="display:none;">
-            <div class="empty-illustration"><i class="fa-regular fa-folder-open"></i></div>
-            <div>No reports found.</div>
-        </div>
         <div style="overflow-x:auto;">
-        <table id="reportTable">
-            <thead class="sticky-header">
+        <table id="reportTable" class="hd-table">
+            <caption class="table-caption">
+                <div class="search-wrap-table">
+                    <i class="fa fa-search search-icon"></i>
+                    <input class="search-box-hd" id="search" placeholder="Search by name..." oninput="filterTableHD()" />
+                </div>
+            </caption>
+            <thead class="hd-header">
                 <tr>
                     <th></th>
-                    <th onclick="sortTable('key')">Name <span id="sortIconKey">&#x25B2;&#x25BC;</span></th>
-                    <th onclick="sortTable('created')">Created <span id="sortIconCreated">&#x25B2;&#x25BC;</span></th>
-                    <th onclick="sortTable('updated')">Updated <span id="sortIconUpdated">&#x25B2;&#x25BC;</span></th>
+                    <th class="sortable" onclick="sortTableHD('key')">Name <span id="sortIconKey" class="sort-arrow">&#x25B2;&#x25BC;</span></th>
+                    <th class="sortable" onclick="sortTableHD('created')">Created <span id="sortIconCreated" class="sort-arrow">&#x25B2;&#x25BC;</span></th>
+                    <th class="sortable" onclick="sortTableHD('updated')">Updated <span id="sortIconUpdated" class="sort-arrow">&#x25B2;&#x25BC;</span></th>
                     <th>Link</th>
                 </tr>
             </thead>
@@ -152,6 +242,10 @@
                 {{REPORT_ROWS}}
             </tbody>
         </table>
+        </div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-illustration"><i class="fa-regular fa-folder-open"></i></div>
+            <div>No reports found.</div>
         </div>
     </div>
     <script>
@@ -189,20 +283,38 @@
             btn.innerHTML = '&#9660;';
         }
     }
-    function filterTable() {
+    function filterTableHD() {
         var input = document.getElementById('search').value.toLowerCase();
         var rows = document.querySelectorAll('#reportTable tbody tr');
-        let visible = 0;
-        for (var i = 0; i < rows.length; i += 2) {
-            var name = rows[i].children[1].textContent.toLowerCase();
-            var show = name.includes(input);
-            rows[i].style.display = show ? '' : 'none';
-            rows[i+1].style.display = show && rows[i+1].style.display === 'table-row' ? 'table-row' : 'none';
-            if (show) visible++;
+        let reportRows = [];
+        for (let i = 0; i < rows.length; i += 2) {
+            let name = rows[i].children[1].textContent.toLowerCase();
+            let created = rows[i].children[2].textContent;
+            let updated = rows[i].children[3].textContent;
+            let show = name.includes(input);
+            reportRows.push({
+                main: rows[i],
+                details: rows[i+1],
+                name,
+                created,
+                updated,
+                show
+            });
         }
+        let visible = 0;
+        reportRows.forEach(r => {
+            if (r.show) {
+                r.main.style.display = '';
+                r.details.style.display = r.details.style.display === 'table-row' ? 'table-row' : 'none';
+                visible++;
+            } else {
+                r.main.style.display = 'none';
+                r.details.style.display = 'none';
+            }
+        });
         document.getElementById('emptyState').style.display = visible === 0 ? '' : 'none';
     }
-    function sortTable(col) {
+    function sortTableHD(col) {
         var table = document.getElementById('reportTbody');
         var rows = Array.from(table.querySelectorAll('tr')).filter((_,i) => i%2===0);
         var details = Array.from(table.querySelectorAll('tr')).filter((_,i) => i%2===1);
@@ -223,13 +335,13 @@
         table.innerHTML = '';
         rows.forEach(({row, details}) => { table.appendChild(row); table.appendChild(details); });
         // Update sort icons
-        document.getElementById('sortIconKey').innerHTML = col==='key' && sortDirection.key===-1 ? '&#x25B2;' : '&#x25BC;';
-        document.getElementById('sortIconCreated').innerHTML = col==='created' && sortDirection.created===-1 ? '&#x25B2;' : '&#x25BC;';
-        document.getElementById('sortIconUpdated').innerHTML = col==='updated' && sortDirection.updated===-1 ? '&#x25B2;' : '&#x25BC;';
+        document.getElementById('sortIconKey').innerHTML = col==='key' && sortDirection.key===-1 ? '<span style="color:#fff;text-shadow:0 2px 8px #2563eb88;">&#x25B2;</span>' : '<span style="color:#e0e7ff;">&#x25BC;</span>';
+        document.getElementById('sortIconCreated').innerHTML = col==='created' && sortDirection.created===-1 ? '<span style="color:#fff;text-shadow:0 2px 8px #2563eb88;">&#x25B2;</span>' : '<span style="color:#e0e7ff;">&#x25BC;</span>';
+        document.getElementById('sortIconUpdated').innerHTML = col==='updated' && sortDirection.updated===-1 ? '<span style="color:#fff;text-shadow:0 2px 8px #2563eb88;">&#x25B2;</span>' : '<span style="color:#e0e7ff;">&#x25BC;</span>';
     }
     // Initial empty state check
     window.onload = function() {
-        filterTable();
+        filterTableHD();
     };
     </script>
 </body>
