@@ -146,9 +146,9 @@ Content-Type: application/json
 
 {
   "enabled": true,
-  "maxIdleTimeHours": 2,
+  "maxIdleTimeHours": 0.1,
   "maxAgeDays": 1,
-  "cleanupIntervalMinutes": 10
+  "cleanupIntervalMinutes": 1
 }
 
 ###
@@ -192,3 +192,20 @@ Accept: application/json
 ### http://localhost:3000/report/performance-report-001
 ### http://localhost:3000/report/security-scan-001
 ### http://localhost:3000/report/analytics-report-q4
+
+
+### 33. Upload Security Scan Reports (Batch)
+POST http://localhost:3000/upload-reports
+Content-Type: application/json
+
+{
+  "groupId": "tesththt7",
+  "reports": [
+    {
+      "key": "1",
+      "html": "<html><head><meta charset=\"UTF-8\"><title>Security Vulnerability Scan</title></head><body><div class=\"report-container\"><h1>Security Vulnerability Scan</h1><p>Scan completed on <strong>2025-01-07 14:30:00</strong></p><div style=\"display: flex; gap: 20px; margin: 20px 0;\"><div class=\"metric\"><div class=\"metric-value\">7</div><div class=\"metric-label\">Critical Issues</div></div><div class=\"metric\"><div class=\"metric-value\">23</div><div class=\"metric-label\">Medium Issues</div></div><div class=\"metric\"><div class=\"metric-value\">45</div><div class=\"metric-label\">Low Issues</div></div><div class=\"metric\"><div class=\"metric-value\">89%</div><div class=\"metric-label\">Score</div></div></div><h2>Critical Vulnerabilities</h2><table><thead><tr><th>Severity</th><th>Vulnerability</th><th>Component</th><th>Status</th><th>CVSS</th></tr></thead><tbody><tr><td><span class=\"error\">CRITICAL</span></td><td>SQL Injection</td><td>User Login</td><td><span class=\"success\">FIXED</span></td><td>9.8</td></tr><tr><td><span class=\"error\">CRITICAL</span></td><td>Remote Code Execution</td><td>File Upload</td><td><span class=\"error\">OPEN</span></td><td>9.3</td></tr><tr><td><span class=\"warning\">HIGH</span></td><td>XSS Vulnerability</td><td>Comment System</td><td><span class=\"warning\">IN PROGRESS</span></td><td>7.5</td></tr><tr><td><span class=\"warning\">HIGH</span></td><td>Path Traversal</td><td>Download API</td><td><span class=\"error\">OPEN</span></td><td>7.2</td></tr><tr><td><span class=\"info\">MEDIUM</span></td><td>Information Disclosure</td><td>Error Pages</td><td><span class=\"success\">FIXED</span></td><td>5.3</td></tr></tbody></table><h2>Remediation Actions</h2><ul><li class=\"error\">🚨 <strong>URGENT:</strong> Patch Remote Code Execution vulnerability immediately</li><li class=\"warning\">⚠️ Complete XSS fix within 48 hours</li><li class=\"warning\">⚠️ Implement path traversal protection</li><li class=\"success\">✅ SQL injection vulnerability successfully patched</li><li class=\"info\">ℹ️ Review error handling to prevent information leakage</li></ul></div></body></html>"
+    }
+  ]
+}
+
+###

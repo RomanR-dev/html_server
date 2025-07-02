@@ -196,3 +196,131 @@ a:hover {
         padding: 20px;
     }
 }
+
+/* Enhance table header and filter controls for /reports page */
+table thead th {
+    background: #222 !important;
+    color: #fff !important;
+}
+.search-box, .sort-select {
+    color: #111 !important;
+    background: #fff !important;
+    border: 1px solid #bbb !important;
+}
+.sort-select option {
+    color: #111 !important;
+    background: #fff !important;
+}
+
+/* Modern container for all main pages */
+.container {
+    max-width: 1100px;
+    margin: 48px auto 32px auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 40px #0002;
+    padding: 40px 32px;
+}
+
+/* Group List and Cards for /report-groups */
+.group-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    margin-top: 32px;
+    justify-content: flex-start;
+}
+.group-card {
+    background: linear-gradient(120deg, #e0e7ff 0%, #f7f9fb 100%);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px #0001;
+    padding: 0 0 18px 0;
+    min-width: 320px;
+    max-width: 340px;
+    flex: 1 1 320px;
+    transition: box-shadow 0.2s;
+    border: 1.5px solid #e3e8f0;
+}
+.group-card:hover {
+    box-shadow: 0 6px 24px #667eea33;
+    border-color: #667eea;
+}
+.group-header {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #2563eb;
+    background: #f1f5ff;
+    border-radius: 14px 14px 0 0;
+    padding: 18px 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #e3e8f0;
+    user-select: none;
+}
+.group-header .arrow {
+    margin-left: auto;
+    font-size: 1.1em;
+    color: #888;
+    transition: transform 0.2s;
+}
+.group-content {
+    display: none;
+    padding: 18px 24px 0 24px;
+}
+.report-link {
+    display: block;
+    margin: 8px 0;
+    padding: 10px 14px;
+    background: #fff;
+    border-radius: 8px;
+    color: #2563eb;
+    font-weight: 500;
+    text-decoration: none;
+    box-shadow: 0 1px 4px #0001;
+    transition: background 0.15s, color 0.15s;
+}
+.report-link:hover {
+    background: #e0e7ff;
+    color: #1746a0;
+}
+
+/* Search box and table tweaks for /reports */
+.search-sort {
+    margin-bottom: 18px;
+    text-align: right;
+}
+.search-box {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1.5px solid #bbb;
+    font-size: 1em;
+    width: 260px;
+    box-shadow: 0 1px 4px #0001;
+    margin-right: 0;
+}
+
+/* Table tweaks for more modern look */
+table {
+    margin-top: 10px;
+    font-size: 1.05em;
+}
+th, td {
+    padding: 14px 12px;
+}
+
+/* Hide details row by default */
+.details-row {
+    display: none;
+    background: #f7f9fb;
+    color: #444;
+    font-size: 0.98em;
+}
+
+/* Responsive for group cards */
+@media (max-width: 900px) {
+    .container { padding: 18px 4vw; }
+    .group-list { gap: 18px; }
+    .group-card { min-width: 220px; max-width: 100%; }
+}

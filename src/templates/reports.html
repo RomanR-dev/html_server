@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Reports</title>
+    <link rel="stylesheet" href="/public/report.css">
+    <style>
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn {
+            background: linear-gradient(90deg,#667eea 0%,#764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0001;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+        .btn:hover {
+            background: linear-gradient(90deg,#4f8cff 0%,#764ba2 100%);
+            box-shadow: 0 4px 16px #667eea33;
+        }
+        .search-box-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .search-box {
+            padding-left: 38px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: #bbb;
+            font-size: 1.2em;
+        }
+        .sticky-header th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            box-shadow: 0 2px 8px #0001;
+            background: #222 !important;
+        }
+        .view-btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 18px;
+            font-size: 0.98em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .view-btn:hover {
+            background: #1746a0;
+        }
+        .empty-state {
+            text-align: center;
+            color: #888;
+            margin: 60px 0 40px 0;
+        }
+        .empty-illustration {
+            font-size: 4em;
+            margin-bottom: 18px;
+            color: #e0e7ff;
+        }
+        @media (max-width: 700px) {
+            .toolbar { flex-direction: column; align-items: stretch; gap: 18px; }
+            .toolbar-left { flex-direction: column; align-items: stretch; gap: 10px; }
+            .container { padding: 10px 2vw; }
+            table { font-size: 0.98em; }
+        }
+        .expand-btn { cursor: pointer; color: #2563eb; font-size: 1.1em; }
+        .expand-btn:hover { color: #764ba2; }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 18px;
+            background: #fff;
+            color: #2563eb;
+            border: 1.5px solid #2563eb;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 1em;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s, border 0.15s;
+        }
+        .back-btn:hover {
+            background: #2563eb;
+            color: #fff;
+            border-color: #1746a0;
+        }
+        .filters-bar {
+            background: #f7f9fb;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px #0001;
+            padding: 18px 24px 10px 24px;
+            margin-bottom: 24px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn"><i class="fa fa-arrow-left"></i> Back to Home</a>
+        <h1 style="margin-bottom:18px;">Live Report HTML viewer</h1>
+        <div class="filters-bar">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <button class="btn" onclick="exportCSV()">
+                        <i class="fa fa-file-csv"></i> Export CSV
+                    </button>
+                </div>
+                <div class="search-box-wrap">
+                    <i class="fa fa-search search-icon"></i>
+                    <input class="search-box" id="search" placeholder="Search by name..." oninput="filterTable()" />
+                </div>
+            </div>
+        </div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-illustration"><i class="fa-regular fa-folder-open"></i></div>
+            <div>No reports found.</div>
+        </div>
+        <div style="overflow-x:auto;">
+        <table id="reportTable">
+            <thead class="sticky-header">
+                <tr>
+                    <th></th>
+                    <th onclick="sortTable('key')">Name <span id="sortIconKey">&#x25B2;&#x25BC;</span></th>
+                    <th onclick="sortTable('created')">Created <span id="sortIconCreated">&#x25B2;&#x25BC;</span></th>
+                    <th onclick="sortTable('updated')">Updated <span id="sortIconUpdated">&#x25B2;&#x25BC;</span></th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody id="reportTbody">
+                {{REPORT_ROWS}}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    <script>
+    function exportCSV() {
+        const rows = Array.from(document.querySelectorAll('#reportTable tbody tr')).filter((_,i) => i%2===0);
+        if (!rows.length) return;
+        let csv = 'Name,Created,Updated,Link\n';
+        rows.forEach(row => {
+            const name = row.children[1].textContent.trim();
+            const created = row.children[2].textContent.trim();
+            const updated = row.children[3].textContent.trim();
+            const link = row.children[4].querySelector('a')?.href || '';
+            csv += `"${name}","${created}","${updated}","${link}"\n`;
+        });
+        const blob = new Blob([csv], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reports.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    // Modernized filterTable and sortTable, plus empty state logic
+    let sortDirection = { key: 1, created: 1, updated: 1 };
+    function toggleDetails(i) {
+        var row = document.getElementById('details'+i);
+        var btn = row.previousElementSibling.querySelector('.expand-btn');
+        if (row.style.display === 'table-row') {
+            row.style.display = 'none';
+            btn.innerHTML = '&#9654;';
+        } else {
+            row.style.display = 'table-row';
+            btn.innerHTML = '&#9660;';
+        }
+    }
+    function filterTable() {
+        var input = document.getElementById('search').value.toLowerCase();
+        var rows = document.querySelectorAll('#reportTable tbody tr');
+        let visible = 0;
+        for (var i = 0; i < rows.length; i += 2) {
+            var name = rows[i].children[1].textContent.toLowerCase();
+            var show = name.includes(input);
+            rows[i].style.display = show ? '' : 'none';
+            rows[i+1].style.display = show && rows[i+1].style.display === 'table-row' ? 'table-row' : 'none';
+            if (show) visible++;
+        }
+        document.getElementById('emptyState').style.display = visible === 0 ? '' : 'none';
+    }
+    function sortTable(col) {
+        var table = document.getElementById('reportTbody');
+        var rows = Array.from(table.querySelectorAll('tr')).filter((_,i) => i%2===0);
+        var details = Array.from(table.querySelectorAll('tr')).filter((_,i) => i%2===1);
+        var idx = { key: 1, created: 2, updated: 3 }[col];
+        rows = rows.map((row, i) => ({ row, details: details[i] }));
+        rows.sort(function(a, b) {
+            var aVal = a.row.children[idx].textContent;
+            var bVal = b.row.children[idx].textContent;
+            if (col === 'created' || col === 'updated') {
+                aVal = new Date(aVal);
+                bVal = new Date(bVal);
+            }
+            if (aVal < bVal) return -1 * sortDirection[col];
+            if (aVal > bVal) return 1 * sortDirection[col];
+            return 0;
+        });
+        sortDirection[col] *= -1;
+        table.innerHTML = '';
+        rows.forEach(({row, details}) => { table.appendChild(row); table.appendChild(details); });
+        // Update sort icons
+        document.getElementById('sortIconKey').innerHTML = col==='key' && sortDirection.key===-1 ? '&#x25B2;' : '&#x25BC;';
+        document.getElementById('sortIconCreated').innerHTML = col==='created' && sortDirection.created===-1 ? '&#x25B2;' : '&#x25BC;';
+        document.getElementById('sortIconUpdated').innerHTML = col==='updated' && sortDirection.updated===-1 ? '&#x25B2;' : '&#x25BC;';
+    }
+    // Initial empty state check
+    window.onload = function() {
+        filterTable();
+    };
+    </script>
+</body>
+</html> 

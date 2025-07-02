@@ -37,4 +37,22 @@ function injectCSS(htmlContent) {
     }
 }
 
-module.exports = { injectCSS, initializeServer }; 
+function escapeHtml(str) {
+    return String(str).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[c]));
+}
+
+function removeKeyFromGroups(key, groupMap) {
+    for (const [groupId, keySet] of groupMap.entries()) {
+        keySet.delete(key);
+        if (keySet.size === 0) {
+            groupMap.delete(groupId);
+        }
+    }
+}
+
+module.exports = {
+    injectCSS,
+    initializeServer,
+    escapeHtml,
+    removeKeyFromGroups
+}; 

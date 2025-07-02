@@ -1,10 +1,15 @@
 // cleanupRoutes.js
 const express = require('express');
 const { CLEANUP_CONFIG, cleanupExpiredReports, startCleanupJob, stopCleanupJob, getCleanupInterval } = require('../utils/cleanup');
-const { injectCSS, initializeServer } = require('../utils/helpers');
+const { injectCSS, initializeServer, escapeHtml, removeKeyFromGroups } = require('../utils/helpers');
 const fs = require('fs').promises;
 const path = require('path');
 const marked = require('marked');
+const { renderTemplate } = require('../utils/template');
+const { reportTableScript, groupListScript, cleanupConfigScript } = require('../utils/scripts');
+
+const groupMap = new Map(); // groupId -> Set of keys
+const TEMPLATE_DIR = path.join(__dirname, '../templates');
 
 function createCleanupRoutes(reportMap, reportsDir) {
     const router = express.Router();
@@ -106,15 +111,20 @@ function createCleanupRoutes(reportMap, reportsDir) {
     return router;
 }
 
+
 function setupApiRoutes(app, reportMap, REPORTS_DIR, PUBLIC_DIR, PORT) {
     // Cleanup endpoints
     app.post('/cleanup', async (req, res) => {
         try {
             const beforeCount = reportMap.size;
+            // Collect keys before cleanup
+            const keysBefore = new Set(reportMap.keys());
             await cleanupExpiredReports(reportMap, REPORTS_DIR);
             const afterCount = reportMap.size;
+            const deletedKeys = [...keysBefore].filter(k => !reportMap.has(k));
+            // Remove deleted keys from groups
+            deletedKeys.forEach(k => removeKeyFromGroups(k, groupMap));
             const deletedCount = beforeCount - afterCount;
-
             res.json({
                 success: true,
                 message: 'Manual cleanup completed',
@@ -298,18 +308,45 @@ function setupApiRoutes(app, reportMap, REPORTS_DIR, PUBLIC_DIR, PORT) {
             `);
         }
     });
-    app.get('/reports', (req, res) => {
+    app.get('/reports', async (req, res) => {
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            const reports = Array.from(reportMap.entries()).map(([key, info]) => ({
+                key,
+                url: info.url,
+                serve_url: `http://localhost:${PORT}${info.url}`,
+                created: info.created,
+                updated: info.updated
+            }));
+            return res.json({
+                total: reports.length,
+                reports
+            });
+        }
         const reports = Array.from(reportMap.entries()).map(([key, info]) => ({
             key,
             url: info.url,
-            serve_url: `http://localhost:${PORT}${info.url}`,
             created: info.created,
             updated: info.updated
         }));
-        res.json({
-            total: reports.length,
-            reports
-        });
+        const rows = reports.map((r, i) => `
+            <tr>
+                <td><span class="expand-btn" onclick="toggleDetails(${i})">&#9654;</span></td>
+                <td>${escapeHtml(r.key)}</td>
+                <td>${r.created ? new Date(r.created).toLocaleString() : ''}</td>
+                <td>${r.updated ? new Date(r.updated).toLocaleString() : ''}</td>
+                <td><a href="/report/${encodeURIComponent(r.key)}" target="_blank">View</a></td>
+            </tr>
+            <tr class="details-row" id="details${i}">
+                <td colspan="5" style="padding:18px 10px; color:#444;">
+                    <b>Key:</b> ${escapeHtml(r.key)}<br>
+                    <b>Created:</b> ${r.created ? new Date(r.created).toLocaleString() : ''}<br>
+                    <b>Updated:</b> ${r.updated ? new Date(r.updated).toLocaleString() : ''}<br>
+                    <b>URL:</b> <a href="/report/${encodeURIComponent(r.key)}" target="_blank">/report/${escapeHtml(r.key)}</a>
+                </td>
+            </tr>
+        `).join('');
+        const html = await renderTemplate('reports.html', { REPORT_ROWS: rows, SCRIPT: reportTableScript });
+        res.send(html);
     });
     app.delete('/report/:key', async (req, res) => {
         try {
@@ -321,6 +358,7 @@ function setupApiRoutes(app, reportMap, REPORTS_DIR, PUBLIC_DIR, PORT) {
             const filepath = path.join(REPORTS_DIR, reportInfo.filename);
             await fs.unlink(filepath);
             reportMap.delete(key);
+            removeKeyFromGroups(key, groupMap);
             res.json({
                 success: true,
                 message: 'Report deleted successfully',
@@ -386,6 +424,169 @@ function setupApiRoutes(app, reportMap, REPORTS_DIR, PUBLIC_DIR, PORT) {
                 key
             });
         }
+    });
+
+    // Upload multiple reports to a group
+    app.post('/upload-reports', async (req, res) => {
+        try {
+            const { groupId, reports } = req.body;
+            if (!groupId || !Array.isArray(reports) || reports.length === 0) {
+                return res.status(400).json({ error: 'groupId and reports[] are required' });
+            }
+            // Check for duplicate keys within the batch
+            const keyCounts = reports.reduce((acc, r) => {
+                acc[r.key] = (acc[r.key] || 0) + 1;
+                return acc;
+            }, {});
+            const batchDuplicates = Object.keys(keyCounts).filter(k => keyCounts[k] > 1);
+            if (batchDuplicates.length > 0) {
+                return res.status(400).json({
+                    error: 'Duplicate keys in upload batch',
+                    duplicateKeys: batchDuplicates
+                });
+            }
+            // Check for duplicate keys in reportMap
+            const duplicateKeys = reports.filter(r => reportMap.has(r.key)).map(r => r.key);
+            if (duplicateKeys.length > 0) {
+                return res.status(409).json({
+                    error: 'One or more keys already exist',
+                    duplicateKeys
+                });
+            }
+            if (!groupMap.has(groupId)) groupMap.set(groupId, new Set());
+            const groupSet = groupMap.get(groupId);
+            const results = [];
+            for (const { key, html } of reports) {
+                if (!key || !html) {
+                    results.push({ key, success: false, error: 'Missing key or html' });
+                    continue;
+                }
+                // Save report as in /upload
+                const filename = `${key}.html`;
+                const filepath = path.join(REPORTS_DIR, filename);
+                try {
+                    const htmlWithCSS = injectCSS(html);
+                    await fs.writeFile(filepath, htmlWithCSS, 'utf8');
+                    const now = new Date();
+                    reportMap.set(key, {
+                        filename,
+                        created: now,
+                        updated: now,
+                        url: `/report/${key}`
+                    });
+                    groupSet.add(key);
+                    results.push({ key, success: true, url: `/report/${key}` });
+                } catch (error) {
+                    results.push({ key, success: false, error: error.message });
+                }
+            }
+            res.json({
+                success: true,
+                groupId,
+                added: Array.from(groupSet),
+                results
+            });
+        } catch (error) {
+            console.error('Upload-reports error:', error);
+            res.status(500).json({ error: 'Failed to upload reports' });
+        }
+    });
+
+    // /report-groups page
+    app.get('/report-groups', async (req, res) => {
+        const allGroups = Array.from(groupMap.entries());
+        let groupCards = '';
+        let html = '';
+        if (allGroups.length === 0) {
+            groupCards = '<div style="text-align:center;color:#888;">No groups found.</div>';
+        } else {
+            groupCards = allGroups.map(([groupId, keys], i) => {
+                // Sort keys by most recently updated, then created
+                const reportInfos = Array.from(keys).map(key => {
+                    const info = reportMap.get(key);
+                    return {
+                        key,
+                        created: info && info.created ? new Date(info.created) : null,
+                        updated: info && info.updated ? new Date(info.updated) : null
+                    };
+                });
+                reportInfos.sort((a, b) => {
+                    if (b.updated && a.updated && b.updated.getTime() !== a.updated.getTime()) {
+                        return b.updated - a.updated;
+                    }
+                    if (b.created && a.created) {
+                        return b.created - a.created;
+                    }
+                    return 0;
+                });
+                return `
+                <div class="group-card">
+                    <div class="group-header" onclick="toggleGroup(${i})"><i class="fa-solid fa-folder-tree"></i>Group: <b>${escapeHtml(groupId)}</b> <span class='arrow' id='arrow${i}'>&#9654;</span></div>
+                    <div class="group-content" id="group${i}">
+                        ${reportInfos.map(r => `<a class='report-link' href='/report/${encodeURIComponent(r.key)}'><i class='fa-solid fa-file-lines'></i> ${escapeHtml(r.key)}</a>`).join('')}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+        html = await renderTemplate('report-groups.html', { GROUP_CARDS: groupCards, SCRIPT: groupListScript });
+        res.send(html);
+    });
+
+    // /group/:groupId page
+    app.get('/group/:groupId', async (req, res) => {
+        const { groupId } = req.params;
+        if (!groupMap.has(groupId) || groupMap.get(groupId).size === 0) {
+            const html = await renderTemplate('error.html', { TITLE: 'No reports found', MESSAGE: `No reports found for group: ${escapeHtml(groupId)}` });
+            return res.status(404).send(html);
+        }
+        const keys = Array.from(groupMap.get(groupId));
+        const reportInfos = keys.map(key => {
+            const info = reportMap.get(key);
+            return {
+                key,
+                created: info && info.created ? new Date(info.created) : null,
+                updated: info && info.updated ? new Date(info.updated) : null
+            };
+        });
+        // Sort by updated (desc), then created (desc)
+        reportInfos.sort((a, b) => {
+            if (b.updated && a.updated && b.updated.getTime() !== a.updated.getTime()) {
+                return b.updated - a.updated;
+            }
+            if (b.created && a.created) {
+                return b.created - a.created;
+            }
+            return 0;
+        });
+        const toolbar = `
+            <div style="background:#222;padding:16px 0 16px 0;text-align:center;">
+                ${reportInfos.map(r =>
+                    `<a href="/report/${encodeURIComponent(r.key)}" style="display:inline-block;margin:0 10px;padding:10px 24px;background:#4f8cff;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;transition:background 0.2s;box-shadow:0 2px 8px #0002;">
+                        <div>Report: <b>${escapeHtml(r.key)}</b></div>
+                        <div style='font-size:12px;font-weight:normal;color:#e0e0e0;'>${r.created ? r.created.toLocaleString() : ''}</div>
+                    </a>`
+                ).join('')}
+            </div>
+        `;
+        const html = await renderTemplate('group.html', {
+            GROUP_ID: escapeHtml(groupId),
+            TOOLBAR: toolbar,
+            REPORT_COUNT: reportInfos.length
+        });
+        res.send(html);
+    });
+
+    // /cleanup-config page
+    app.get('/cleanup-config', async (req, res) => {
+        const html = await renderTemplate('cleanup-config.html', { SCRIPT: cleanupConfigScript });
+        res.send(html);
+    });
+
+    // Error and not found pages (example usage)
+    app.use(async (req, res, next) => {
+        const html = await renderTemplate('error.html', { TITLE: '404 Not Found', MESSAGE: 'The page you are looking for does not exist.' });
+        res.status(404).send(html);
     });
 }
 

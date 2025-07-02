@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Report Groups</title>
+    <link rel="stylesheet" href="/public/report.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn"><i class="fa fa-arrow-left"></i> Back to Home</a>
+        <h1><i class="fa-solid fa-layer-group"></i> All Report Groups</h1>
+        <div class="group-list">
+            {{GROUP_CARDS}}
+        </div>
+    </div>
+    <script>
+    {{SCRIPT}}
+    </script>
+</body>
+</html>
+<style>
+.back-btn {
+    display: inline-block;
+    margin-bottom: 18px;
+    background: #fff;
+    color: #2563eb;
+    border: 1.5px solid #2563eb;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 1em;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s, border 0.15s;
+}
+.back-btn:hover {
+    background: #2563eb;
+    color: #fff;
+    border-color: #1746a0;
+}
+</style> 
